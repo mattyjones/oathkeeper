@@ -34,33 +34,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// Scrape the site
-//func fetchServices(address string) *[]Service {
-//
-//	// setup a http client
-//	httpTransport := &http.Transport{}
-//	httpClient := &http.Client{Transport: httpTransport}
-//
-//	// create a request
-//	req, err := http.NewRequest("GET", address, nil)
-//	if err != nil {
-//		fmt.Fprintln(os.Stderr, "can't create request:", err)
-//		os.Exit(2)
-//	}
-//	// use the http client to fetch the page
-//	resp, err := httpClient.Do(req)
-//	if err != nil {
-//		fmt.Fprintln(os.Stderr, "can't GET page:", err)
-//		os.Exit(3)
-//	}
-//	defer resp.Body.Close()
-//
-//	// scrape the tor page to check if the connection is being proxied
-//	services := parseServices(resp)
-//
-//	return &services
-//}
-
 func (c *ServiceCollection) fetchHosts() {
 
 	// setup a http client
@@ -129,8 +102,6 @@ func (c *ServiceCollection) parseServices(resp *http.Response) {
 		log.Fatal(err)
 	}
 
-	//var services []Service
-
 	// Find the review items
 	doc.Find("li").Each(func(i int, g *goquery.Selection) {
 
@@ -150,7 +121,7 @@ func (c *ServiceCollection) parseServices(resp *http.Response) {
 
 				// Create our basic service data structutre. This will be used for scraping the actual services
 				var service Service
-				service.Service = svc
+				service.Name = svc
 				service.Link = link
 				c.Services = append(c.Services, &service)
 			}
@@ -165,13 +136,10 @@ func (s *Service) parseHosts(resp *http.Response) {
 		log.Fatal(err)
 	}
 
-	//var hosts []Host
-
 	// Find the review items
 	doc.Find("td").Each(func(i int, g *goquery.Selection) {
 
 		if strings.Contains(g.Text(), ".com") {
-			//fmt.Println(s.Text())
 
 			var h Host
 			h.Host = strings.TrimSpace(g.Text())

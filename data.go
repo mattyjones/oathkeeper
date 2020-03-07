@@ -21,18 +21,20 @@ THE SOFTWARE.
 */
 package main
 
-// TODO add doc strings
+// Host contains the required data points for a single endpoint
 type Host struct {
 	Host string
 	Port string
 }
 
+// Service contains the required data points for a single service
 type Service struct {
-	Link    string
-	Service string //TODO change this to name
-	Hosts   []*Host
+	Link  string
+	Name  string
+	Hosts []*Host
 }
 
+// ServiceCollection is a collection of services and will hold all known services and their associated endpoints
 type ServiceCollection struct {
 	Services []*Service
 }

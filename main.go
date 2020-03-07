@@ -32,9 +32,10 @@ func main() {
 	collection.fetchHosts()
 
 	for _, s := range collection.Services {
-		fmt.Println(s.Service)
+		fmt.Println(s.Name)
 		for _, h := range s.Hosts {
 			fmt.Println(h.Host)
 		}
+		fmt.Println("")
 	}
 }
