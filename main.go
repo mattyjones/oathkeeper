@@ -22,8 +22,10 @@ THE SOFTWARE.
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/go-yaml/yaml"
+	"os"
 )
 
 func main() {
@@ -47,6 +49,12 @@ func main() {
 
 	foo, _ := yaml.Marshal(&collection)
 
-	fmt.Printf("%s\n", string(foo))
+	f, _ := os.Create("./aws_endpoints.yaml")
+
+	w := bufio.NewWriter(f)
+	n4, _ := w.WriteString(string(foo))
+	fmt.Printf("wrote %d bytes\n", n4)
+
+	w.Flush()
 
 }
