@@ -1,0 +1,21 @@
+---
+name: "AWS Endpoint Whitelist"
+team: "Public Proxy"
+acl:
+    -   name: whitelist
+        destination:
+            -   name: "Chime"
+                action: "accept"
+                endpoints:
+                    host:
+                        - "service.chime.aws.amazom.com"
+                        - "service2.chime.aws.amazom.com"
+                    port:
+                        - 443
+            -   name: "Alexa for Business"
+                action: "accept"
+                endpoints:
+                    host:
+                        - "a4b.us-west-1.amazonaws.com"
+                    port:
+                        - 443
