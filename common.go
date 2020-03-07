@@ -21,24 +21,20 @@ THE SOFTWARE.
 */
 package main
 
-// The names of the struct's below are used to build the yaml output of a specific format.
-// Changing the names without ensuring that the tags are correct will break the desired format
+import (
+	"fmt"
+	//"log"
+	//"net"
+	"os"
+	//"strings"
+	//"net/http"
+	//"github.com/PuerkitoBio/goquery"
+)
 
-// Endpoints contains the required host data for services
-type Endpoints struct {
-	Host []string `yaml:"host"`
-	Port string   `yaml:"port"`
-}
-
-// Service contains the required data points for each service
-type Service struct {
-	Link     string    `yaml:"link"`
-	Name     string    `yaml:"name"`
-	Endpoint Endpoints `yaml:"endpoints"`
-	Action   string    `yaml:"action"`
-}
-
-// Destination is a collection of services and will hold all known services and their associated endpoints.
-type Destination struct {
-	Services []*Service `yaml:"destination"`
+// checkError is a generic error checking function
+func checkError(e error) {
+	if e != nil {
+		fmt.Println(e)
+		os.Exit(1)
+	}
 }

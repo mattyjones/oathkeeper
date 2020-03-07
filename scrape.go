@@ -23,17 +23,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"log"
-	"strings"
-	//"time"
-
-	//"net"
 	"net/http"
 	"os"
-	//"strings"
-	"github.com/PuerkitoBio/goquery"
+	"strings"
 )
 
+// fetchHosts will scrape the AWS documentation page of each service and pass the response to parseHosts to
+// parse and assemble the data into a usable structure.
 func (c *Destination) fetchHosts() {
 
 	// setup a http client
@@ -55,28 +53,30 @@ func (c *Destination) fetchHosts() {
 		}
 		defer resp.Body.Close()
 
+		// parse the response into a usable data structure
 		s.parseHosts(resp)
 	}
 }
 
-// newHunt will initialize a hunt data structure
-func newCollection() (*Destination, error) {
-	var collection Destination
+// NewDestination will initialize a Destination data structure
+func NewDestination() (*Destination, error) {
+	var destination Destination
 
-	return &collection, nil
+	return &destination, nil
 }
 
-// Finish will set the end time and do any necessary cleanup steps and then make the status as necessary
+// fetchServices will scrape the AWS documentation page and pass the response to parseServices to
+// parse and assemble the data into a usable structure for discovering and cataloging endpoints.
 func (c *Destination) fetchServices() {
 
-	collectionAddress := "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.partial.html"
+	documentationAddress := "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.partial.html"
 
 	// setup a http client
 	httpTransport := &http.Transport{}
 	httpClient := &http.Client{Transport: httpTransport}
 
 	// create a request
-	req, err := http.NewRequest("GET", collectionAddress, nil)
+	req, err := http.NewRequest("GET", documentationAddress, nil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "can't create request:", err)
 		os.Exit(2)
@@ -89,11 +89,12 @@ func (c *Destination) fetchServices() {
 	}
 	defer resp.Body.Close()
 
-	// scrape the tor page to check if the connection is being proxied
+	// parse the response into a usable data structure
 	c.parseServices(resp)
 }
 
-// Parse the tor project site to ensure that the proxy is working. This will return a bool and the ip address
+// Parse the the endpoint and quota documentation page for a service for specific data points and then assemble
+// them into a usable data structure.
 func (c *Destination) parseServices(resp *http.Response) {
 
 	// Load the HTML document
@@ -102,10 +103,12 @@ func (c *Destination) parseServices(resp *http.Response) {
 		log.Fatal(err)
 	}
 
-	// Find the review items
+	// Find the li items. The services are organized into an unordered list with their respective relative
+	// links to their detailed documentation pages.
 	doc.Find("li").Each(func(i int, g *goquery.Selection) {
 
-		// Get the service name in the list item
+		// Get the service name in the list item and remove any excess white space
+		// BUG this does not always work
 		svc := strings.TrimSpace(g.Text())
 
 		// Get the relative link for the service page
@@ -119,7 +122,7 @@ func (c *Destination) parseServices(resp *http.Response) {
 				linkFooter := ".partial.html"
 				link := linkHeader + strParts[1] + linkFooter
 
-				// Create our basic service data structutre. This will be used for scraping the actual services
+				// Create our basic service data structure. This will be used for scraping the actual services
 				var service Service
 				service.Name = svc
 				service.Link = link
@@ -129,6 +132,8 @@ func (c *Destination) parseServices(resp *http.Response) {
 	})
 }
 
+// Parse the service documentation page for specific data points and then assemble them into a
+// usable data structure.
 func (s *Service) parseHosts(resp *http.Response) {
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
@@ -138,22 +143,23 @@ func (s *Service) parseHosts(resp *http.Response) {
 
 	var h []string
 
-	// Find the review items
+	// Find the td items. The data points we need are stored in a table. We pull each column in the table row
+	// and look for specific matches to the pattern we need.
 	doc.Find("td").Each(func(i int, g *goquery.Selection) {
 
 		if strings.Contains(g.Text(), ".com") {
 
-			//h = []string
-
+			// BUG this does not always work
 			h = append(h, strings.TrimSpace(g.Text()))
 
-			//var h Host
-			//h.Host = strings.TrimSpace(g.Text())
-			//h.Port = "443"
-			//
-			//s.Hosts = append(s.Hosts, &h)
 		}
 	})
 	s.Endpoint.Host = h
+
+	// BUG not every endpoint is HTTPS, we need to figure out how to get the protocol for each url. In the
+	// BUG cases where there is no protocol we need to find some other way or a method to call it out for
+	// BUG manual checking. This could only be done on the first pass but that would require loading an existing
+	// BUG endpoint yaml file and then diffing and combining it with what we have which is beyond the scope
+	// BUG of the pilot.
 	s.Endpoint.Port = "443"
 }

@@ -22,20 +22,25 @@ THE SOFTWARE.
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"github.com/go-yaml/yaml"
-	"os"
 )
 
 func main() {
+
+	// set debug output
 	debug := false
 
-	collection, _ := newCollection()
+	// A new collection of all services and endpoints
+	collection, _ := NewDestination()
 
+	// Get the list of current services offered by AWS
 	collection.fetchServices()
 
+	// Get the current list of endpoints for each service
 	collection.fetchHosts()
+
+	// Write the output to a yaml file
+	collection.writeYaml()
 
 	if debug { // TODO move this to a function for generating stdout text (writing it to a file as well)
 		for _, s := range collection.Services {
@@ -46,15 +51,4 @@ func main() {
 			fmt.Println("")
 		}
 	}
-
-	foo, _ := yaml.Marshal(&collection)
-
-	f, _ := os.Create("./aws_endpoints.yaml")
-
-	w := bufio.NewWriter(f)
-	n4, _ := w.WriteString(string(foo))
-	fmt.Printf("wrote %d bytes\n", n4)
-
-	w.Flush()
-
 }
