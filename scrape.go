@@ -34,7 +34,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func (c *ServiceCollection) fetchHosts() {
+func (c *Destination) fetchHosts() {
 
 	// setup a http client
 	httpTransport := &http.Transport{}
@@ -60,14 +60,14 @@ func (c *ServiceCollection) fetchHosts() {
 }
 
 // newHunt will initialize a hunt data structure
-func newCollection() (*ServiceCollection, error) {
-	var collection ServiceCollection
+func newCollection() (*Destination, error) {
+	var collection Destination
 
 	return &collection, nil
 }
 
 // Finish will set the end time and do any necessary cleanup steps and then make the status as necessary
-func (c *ServiceCollection) fetchServices() {
+func (c *Destination) fetchServices() {
 
 	collectionAddress := "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.partial.html"
 
@@ -94,7 +94,7 @@ func (c *ServiceCollection) fetchServices() {
 }
 
 // Parse the tor project site to ensure that the proxy is working. This will return a bool and the ip address
-func (c *ServiceCollection) parseServices(resp *http.Response) {
+func (c *Destination) parseServices(resp *http.Response) {
 
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
@@ -136,16 +136,24 @@ func (s *Service) parseHosts(resp *http.Response) {
 		log.Fatal(err)
 	}
 
+	var h []string
+
 	// Find the review items
 	doc.Find("td").Each(func(i int, g *goquery.Selection) {
 
 		if strings.Contains(g.Text(), ".com") {
 
-			var h Host
-			h.Host = strings.TrimSpace(g.Text())
-			h.Port = "443"
+			//h = []string
 
-			s.Hosts = append(s.Hosts, &h)
+			h = append(h, strings.TrimSpace(g.Text()))
+
+			//var h Host
+			//h.Host = strings.TrimSpace(g.Text())
+			//h.Port = "443"
+			//
+			//s.Hosts = append(s.Hosts, &h)
 		}
 	})
+	s.Endpoint.Host = h
+	s.Endpoint.Port = "443"
 }

@@ -22,19 +22,21 @@ THE SOFTWARE.
 package main
 
 // Host contains the required data points for a single endpoint
-type Host struct {
-	Host string
-	Port string
+type Endpoints struct {
+	Host []string `yaml:"host"`
+	Port string   `yaml:"port"`
 }
 
 // Service contains the required data points for a single service
 type Service struct {
-	Link  string
-	Name  string
-	Hosts []*Host
+	Link     string    `yaml:"link"`
+	Name     string    `yaml:"name"`
+	Endpoint Endpoints `yaml:"endpoints"`
+	//Port      string   `yaml:"port"`
+	Action string `yaml:"action"`
 }
 
-// ServiceCollection is a collection of services and will hold all known services and their associated endpoints
-type ServiceCollection struct {
-	Services []*Service
+// Destination is a collection of services and will hold all known services and their associated endpoints
+type Destination struct {
+	Services []*Service `yaml:"destination"`
 }

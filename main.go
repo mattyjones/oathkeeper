@@ -21,9 +21,13 @@ THE SOFTWARE.
 */
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/go-yaml/yaml"
+)
 
 func main() {
+	debug := false
 
 	collection, _ := newCollection()
 
@@ -31,11 +35,18 @@ func main() {
 
 	collection.fetchHosts()
 
-	for _, s := range collection.Services {
-		fmt.Println(s.Name)
-		for _, h := range s.Hosts {
-			fmt.Println(h.Host)
+	if debug { // TODO move this to a function for generating stdout text (writing it to a file as well)
+		for _, s := range collection.Services {
+			fmt.Println(s.Name)
+			for _, h := range s.Endpoint.Host {
+				fmt.Println(h)
+			}
+			fmt.Println("")
 		}
-		fmt.Println("")
 	}
+
+	foo, _ := yaml.Marshal(&collection)
+
+	fmt.Printf("%s\n", string(foo))
+
 }
