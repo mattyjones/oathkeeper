@@ -13,7 +13,7 @@ all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -21,21 +21,20 @@ THE SOFTWARE.
 */
 package main
 
+import "fmt"
+
 func main() {
 
-	AWS_DOC_ADDRESS := "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.partial.html"
+	collection, _ := newCollection()
 
-	services := fetchServices(AWS_DOC_ADDRESS)
+	collection.fetchServices()
 
-	fetchHosts(services)
+	collection.fetchHosts()
 
-	//proxyAddress := "127.0.0.1"
-	//proxyPort := 9050
-
-	// Check to see if we running requests through tor
-	//status, ipAddr := checkTorConnection(proxyAddress, proxyPort)
-
-	//fmt.Println("Connection Status: ", status)
-	//fmt.Println("IP Address: ", ipAddr)
-
+	for _, s := range collection.Services {
+		fmt.Println(s.Service)
+		for _, h := range s.Hosts {
+			fmt.Println(h.Host)
+		}
+	}
 }
