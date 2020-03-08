@@ -15,7 +15,7 @@
 1. combine fetchHosts and fetchServices into a single function
 
 ## Bugs (prioritized)
-1. Some of the endpoints are not formatted correctly and contain newline characters
+1. ~~Some of the endpoints are not formatted correctly and contain newline characters~~
 1. We need to get the correct port (Workmail)
 
 ## Features (prioritized)

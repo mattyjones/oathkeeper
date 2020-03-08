@@ -58,15 +58,15 @@ func (c *Destination) fetchHosts() error {
 
 		// Add the hosts to the running total
 		for s.Endpoint.HostCount > 0 {
-			c.Telemetry.IncrementHost()
+			c.Telemetry.incrementHost()
 			s.Endpoint.HostCount--
 		}
 	}
 	return nil
 }
 
-// NewDestination will initialize a Destination data structure
-func newDestination() (*Destination, error) {
+// NewCollection will initialize a Destination data structure
+func newCollection() (*Destination, error) {
 	var destination Destination
 
 	destination.start()
@@ -141,7 +141,7 @@ func (c *Destination) parseServices(resp *http.Response) error {
 			href, _ := item.Attr("href")
 			if svc == item.Text() {
 
-				c.Telemetry.IncrementService()
+				c.Telemetry.incrementService()
 
 				// Create the link to the service page
 				strParts := strings.Split(href, ".")
@@ -170,15 +170,15 @@ func (s *Service) parseHosts(resp *http.Response) error {
 		log.Fatal(err)
 	}
 
-	// slice of all hosts
+	// slice of all hosts for each service
 	var h []string
 
-	// Count of all the hosts
+	// Count of the hosts for each service
 	var hCount int
 
-	// Find the td items. The data points we need are stored in a table. We pull each column in the table row
+	// Find the <td> items. The data points we need are stored in a table. We pull each column in the table row
 	// and look for specific matches to the pattern we need. The second statement is needed due to some pages
-	// wrapping multiple endpoints in <p> tags. This will pick up on the neline that is used and filter out the
+	// wrapping multiple endpoints in <p> tags. This will pick up on the newline that is used and filter out the
 	// multiple endpoints per <td>.
 	doc.Find("td").Each(func(i int, g *goquery.Selection) {
 
@@ -189,9 +189,17 @@ func (s *Service) parseHosts(resp *http.Response) error {
 
 		}
 
-		// Find the td items. The data points we need are stored in a table. We pull each column in the table row
+		// This pull out some of the ports that are scattered in the docs. The code is incomplete at this
+		// time due to the inconsistent nature of the documentation. Manual review is needed for the port.
+		//re := regexp.MustCompile(`port\s[0-9]{2,5}`)
+		//port := re.FindString(g.Text())
+		//if port != "" {
+		//	portNumber := strings.Split(port, " ")
+		//}
+
+		// Find the <p> items. The data points we need are stored in a table. We pull each column in the table row
 		// and look for specific matches to the pattern we need. This is here to pick up on the cases where there
-		//are multiple endpoints for a given region. In this case Amazon will wrap each endpoint in a <p> statement.
+		// are multiple endpoints for a given region. In this case Amazon will wrap each endpoint in a <p> statement.
 		g.Find("p").Each(func(i int, f *goquery.Selection) {
 
 			if strings.Contains(f.Text(), ".com") {
@@ -200,6 +208,8 @@ func (s *Service) parseHosts(resp *http.Response) error {
 				hCount++
 			}
 		})
+
+
 	})
 	s.Endpoint.HostCount = hCount
 	s.Endpoint.Host = h
@@ -209,7 +219,7 @@ func (s *Service) parseHosts(resp *http.Response) error {
 	// BUG manual checking. This could only be done on the first pass but that would require loading an existing
 	// BUG endpoint yaml file and then diffing and combining it with what we have which is beyond the scope
 	// BUG of the pilot.
-	s.Endpoint.Port = "443"
+	s.Endpoint.Port = ""
 
 	return nil
 }

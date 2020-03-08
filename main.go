@@ -26,9 +26,8 @@ func main() {
 	// TODO implement flags or some kind of cli here for commandline vars
 
 	// A new collection of all services and endpoints
-	collection, _ := newDestination()
+	collection, _ := newCollection()
 
-	// TODO this needs to be designed better
 	// set the yaml output file
 	collection.Config.OutputFile = "./aws_endpoints.yaml"
 	collection.Config.OutputType = append(collection.Config.OutputType, "yaml")
@@ -46,6 +45,6 @@ func main() {
 	collection.finish()
 
 	// print telemetry data
-	printSessionTelemetry(collection)
+	printTelemetry(collection)
 
 }

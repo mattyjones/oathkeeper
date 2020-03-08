@@ -6,12 +6,12 @@ import (
 )
 
 // IncrementService will bump the count of services.
-func (t *Telemetry) IncrementService() {
+func (t *Telemetry) incrementService() {
 	t.ServiceTotal++
 }
 
 // IncrementFilesTotal will bump the count of hosts.
-func (t *Telemetry) IncrementHost() {
+func (t *Telemetry) incrementHost() {
 	t.HostTotal++
 }
 
@@ -28,7 +28,7 @@ func (s *Destination) initTelemetry() {
 }
 
 // Print a summary of telemetry data
-func printSessionTelemetry(c *Destination) {
+func printTelemetry(c *Destination) {
 
 	fmt.Println("-------Telemetry-------")
 	fmt.Println("Oathkeeper Version......:", AppVersion())
