@@ -30,7 +30,7 @@ func main() {
 
 	// TODO this needs to be designed better
 	// set the yaml output file
-	collection.Config.OutputFile = "./aws_endpoints"
+	collection.Config.OutputFile = "./aws_endpoints.yaml"
 	collection.Config.OutputType = append(collection.Config.OutputType, "yaml")
 
 	// Get the list of current services offered by AWS

@@ -177,16 +177,29 @@ func (s *Service) parseHosts(resp *http.Response) error {
 	var hCount int
 
 	// Find the td items. The data points we need are stored in a table. We pull each column in the table row
-	// and look for specific matches to the pattern we need.
+	// and look for specific matches to the pattern we need. The second statement is needed due to some pages
+	// wrapping multiple endpoints in <p> tags. This will pick up on the neline that is used and filter out the
+	// multiple endpoints per <td>.
 	doc.Find("td").Each(func(i int, g *goquery.Selection) {
 
-		if strings.Contains(g.Text(), ".com") {
+		if strings.Contains(g.Text(), ".com") && !strings.Contains(g.Text(), "\n") {
 
-			// BUG TrimSpace does not always work
 			h = appendHostIfMissing(h, strings.TrimSpace(g.Text()))
 			hCount++
 
 		}
+
+		// Find the td items. The data points we need are stored in a table. We pull each column in the table row
+		// and look for specific matches to the pattern we need. This is here to pick up on the cases where there
+		//are multiple endpoints for a given region. In this case Amazon will wrap each endpoint in a <p> statement.
+		g.Find("p").Each(func(i int, f *goquery.Selection) {
+
+			if strings.Contains(f.Text(), ".com") {
+
+				h = appendHostIfMissing(h, strings.TrimSpace(f.Text()))
+				hCount++
+			}
+		})
 	})
 	s.Endpoint.HostCount = hCount
 	s.Endpoint.Host = h

@@ -19,17 +19,17 @@
 1. We need to get the correct port (Workmail)
 
 ## Features (prioritized)
+1. Bring in cli
 1. ~~YAML output~~
 1. Endpoint metrics
     1. ~~How many services~~
     1. ~~How many endpoints total~~
-1. Debugging
 1. Testing
-1. Add flags for debug, stdout, yaml, and filename
+1. Debugging
+1. ~~Add flags for debug, stdout, yaml, and filename~~ (Dupe)
 1. Perf metrics
     1. ~~How long did it take~~
-1. Threading
-1. Bring in cli if necessary
+1. ~~Threading~~ (Never)
 
 ## Notes
 
@@ -37,6 +37,7 @@
 
 - Yaml file is 4491 lines (original)
 - Yaml file is 4371 lines (after host dedupe)
-- Host Count is 3035
+- Yaml file is 3840 lines (after fixing multi-host per regions)
+- Host Count is 3162
 - Service Count is 164
 - Elapsed Time 11s...16s
