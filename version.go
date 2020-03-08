@@ -23,18 +23,24 @@ package main
 
 import (
 	"fmt"
-	//"log"
-	//"net"
-	"os"
-	//"strings"
-	//"net/http"
-	//"github.com/PuerkitoBio/goquery"
 )
 
-// checkError is a generic error checking function
-func checkError(e error) {
-	if e != nil {
-		fmt.Println(e)
-		os.Exit(1)
-	}
+//AppVersionMajor is the major revision number
+const AppVersionMajor = "0"
+
+// AppVersionMinor is the minor revision number
+const AppVersionMinor = "0"
+
+// AppVersionPatch is the patch version
+const AppVersionPatch = "1"
+
+// AppVersionPre ...
+const AppVersionPre = "3"
+
+// AppVersionBuild should be empty string when releasing
+const AppVersionBuild = ""
+
+// AppVersion generates a usable version string
+func AppVersion() string {
+	return fmt.Sprintf("%s.%s.%s-%s%s", AppVersionMajor, AppVersionMinor, AppVersionPatch, AppVersionPre, AppVersionBuild)
 }

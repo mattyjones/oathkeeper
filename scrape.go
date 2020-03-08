@@ -32,7 +32,7 @@ import (
 
 // fetchHosts will scrape the AWS documentation page of each service and pass the response to parseHosts to
 // parse and assemble the data into a usable structure.
-func (c *Destination) fetchHosts() {
+func (c *Destination) fetchHosts() error {
 
 	// setup a http client
 	httpTransport := &http.Transport{}
@@ -55,19 +55,42 @@ func (c *Destination) fetchHosts() {
 
 		// parse the response into a usable data structure
 		s.parseHosts(resp)
+
+		// Add the hosts to the running total
+		for s.Endpoint.HostCount > 0 {
+			c.Telemetry.IncrementHost()
+			s.Endpoint.HostCount--
+		}
 	}
+	return nil
 }
 
 // NewDestination will initialize a Destination data structure
-func NewDestination() (*Destination, error) {
+func newDestination() (*Destination, error) {
 	var destination Destination
+
+	destination.start()
 
 	return &destination, nil
 }
 
+// Initialize the tool for gathering telemetry
+func (s *Destination) start() error {
+	s.initTelemetry()
+
+	return nil
+}
+
+// finish will cleanup and close anything remaining open
+func (c *Destination) finish() error {
+
+	return nil
+
+}
+
 // fetchServices will scrape the AWS documentation page and pass the response to parseServices to
 // parse and assemble the data into a usable structure for discovering and cataloging endpoints.
-func (c *Destination) fetchServices() {
+func (c *Destination) fetchServices() error {
 
 	documentationAddress := "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.partial.html"
 
@@ -91,11 +114,13 @@ func (c *Destination) fetchServices() {
 
 	// parse the response into a usable data structure
 	c.parseServices(resp)
+
+	return nil
 }
 
 // Parse the the endpoint and quota documentation page for a service for specific data points and then assemble
 // them into a usable data structure.
-func (c *Destination) parseServices(resp *http.Response) {
+func (c *Destination) parseServices(resp *http.Response) error {
 
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
@@ -108,13 +133,15 @@ func (c *Destination) parseServices(resp *http.Response) {
 	doc.Find("li").Each(func(i int, g *goquery.Selection) {
 
 		// Get the service name in the list item and remove any excess white space
-		// BUG this does not always work
+		// BUG TrimSpace does not always work
 		svc := strings.TrimSpace(g.Text())
 
 		// Get the relative link for the service page
 		doc.Find("a[href]").Each(func(index int, item *goquery.Selection) {
 			href, _ := item.Attr("href")
 			if svc == item.Text() {
+
+				c.Telemetry.IncrementService()
 
 				// Create the link to the service page
 				strParts := strings.Split(href, ".")
@@ -126,22 +153,28 @@ func (c *Destination) parseServices(resp *http.Response) {
 				var service Service
 				service.Name = svc
 				service.Link = link
-				c.Services = append(c.Services, &service)
+				c.Services = appendServiceIfMissing(c.Services, &service)
 			}
 		})
 	})
+
+	return nil
 }
 
 // Parse the service documentation page for specific data points and then assemble them into a
 // usable data structure.
-func (s *Service) parseHosts(resp *http.Response) {
+func (s *Service) parseHosts(resp *http.Response) error {
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// slice of all hosts
 	var h []string
+
+	// Count of all the hosts
+	var hCount int
 
 	// Find the td items. The data points we need are stored in a table. We pull each column in the table row
 	// and look for specific matches to the pattern we need.
@@ -149,11 +182,13 @@ func (s *Service) parseHosts(resp *http.Response) {
 
 		if strings.Contains(g.Text(), ".com") {
 
-			// BUG this does not always work
-			h = append(h, strings.TrimSpace(g.Text()))
+			// BUG TrimSpace does not always work
+			h = appendHostIfMissing(h, strings.TrimSpace(g.Text()))
+			hCount++
 
 		}
 	})
+	s.Endpoint.HostCount = hCount
 	s.Endpoint.Host = h
 
 	// BUG not every endpoint is HTTPS, we need to figure out how to get the protocol for each url. In the
@@ -162,4 +197,6 @@ func (s *Service) parseHosts(resp *http.Response) {
 	// BUG endpoint yaml file and then diffing and combining it with what we have which is beyond the scope
 	// BUG of the pilot.
 	s.Endpoint.Port = "443"
+
+	return nil
 }

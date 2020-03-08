@@ -21,18 +21,23 @@ THE SOFTWARE.
 */
 package main
 
+import (
+	"time"
+)
+
 // The names of the struct's below are used to build the yaml output of a specific format.
 // Changing the names without ensuring that the tags are correct will break the desired format
 
 // Endpoints contains the required host data for services
 type Endpoints struct {
-	Host []string `yaml:"host"`
-	Port string   `yaml:"port"`
+	Host      []string `yaml:"host"`
+	Port      string   `yaml:"port"`
+	HostCount int      `yaml:"-"`
 }
 
 // Service contains the required data points for each service
 type Service struct {
-	Link     string    `yaml:"link"`
+	Link     string    `yaml:"-"`
 	Name     string    `yaml:"name"`
 	Endpoint Endpoints `yaml:"endpoints"`
 	Action   string    `yaml:"action"`
@@ -40,5 +45,22 @@ type Service struct {
 
 // Destination is a collection of services and will hold all known services and their associated endpoints.
 type Destination struct {
-	Services []*Service `yaml:"destination"`
+	Services     []*Service `yaml:"destination"`
+	ServiceCount int        `yaml:"-"`
+	Telemetry    *Telemetry `yaml:"-"`
+	Config       *Config    `yaml:"-"`
+}
+
+// Telemetry hold various runtime statistics used for perf data
+type Telemetry struct {
+	StartedAt    time.Time `yaml:"-"`
+	ServiceTotal int       `yaml:"-"`
+	HostTotal    int       `yaml:"-"`
+}
+
+// Config stores various configuration details
+type Config struct {
+	OutputType []string `yaml:"-"`
+	OutputFile string   `yaml:"-"`
+	Debug      bool     `yaml:"-"`
 }

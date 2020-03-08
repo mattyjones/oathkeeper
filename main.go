@@ -21,17 +21,17 @@ THE SOFTWARE.
 */
 package main
 
-import (
-	"fmt"
-)
-
 func main() {
 
-	// set debug output
-	debug := false
+	// TODO implement flags or some kind of cli here for commandline vars
 
 	// A new collection of all services and endpoints
-	collection, _ := NewDestination()
+	collection, _ := newDestination()
+
+	// TODO this needs to be designed better
+	// set the yaml output file
+	collection.Config.OutputFile = "./aws_endpoints"
+	collection.Config.OutputType = append(collection.Config.OutputType, "yaml")
 
 	// Get the list of current services offered by AWS
 	collection.fetchServices()
@@ -39,16 +39,13 @@ func main() {
 	// Get the current list of endpoints for each service
 	collection.fetchHosts()
 
-	// Write the output to a yaml file
-	collection.writeYaml()
+	// output the data
+	collection.outputDestination()
 
-	if debug { // TODO move this to a function for generating stdout text (writing it to a file as well)
-		for _, s := range collection.Services {
-			fmt.Println(s.Name)
-			for _, h := range s.Endpoint.Host {
-				fmt.Println(h)
-			}
-			fmt.Println("")
-		}
-	}
+	// finish and do any cleanup needed
+	collection.finish()
+
+	// print telemetry data
+	printSessionTelemetry(collection)
+
 }
