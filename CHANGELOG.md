@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Add
 - Ability to print services to stdout one service per line
-- Ability to print endpoints to stdout one endpoint per line
 - Ability to print to a yaml file
 
 ### Change
