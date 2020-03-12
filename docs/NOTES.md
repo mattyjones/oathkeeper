@@ -1,8 +1,9 @@
 ## Todo (prioritized)
+1. ~~change Collection to collection~~
 1. ~~Need to dedupe the list (WAF)~~
-1. streamline functions and code
-1. usage and install docs
-1. Add doc strings to all functions
+1. ~~streamline functions and code~~
+1. ~~usage and install docs~~
+1. ~~Add doc strings to all functions~~
 1. design docs
 1. ~~add doc strings to all data structures~~
 1. ~~remove old and dead code/comments~~
@@ -33,11 +34,16 @@
 
 ## Notes
 
+### Ports
+- imap = 993
+- autodiscover = 443
+- ews = 443
+- mobile = 443
+- outlook = 443
+- smtp = 465
+
 ## Stats
 
-- Yaml file is 4491 lines (original)
-- Yaml file is 4371 lines (after host dedupe)
-- Yaml file is 3840 lines (after fixing multi-host per regions)
 - Host Count is 3162
 - Service Count is 164
 - Elapsed Time 11s...16s

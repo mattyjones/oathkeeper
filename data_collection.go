@@ -27,12 +27,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
 // fetchHosts will scrape the AWS documentation page of each service and pass the response to parseHosts to
 // parse and assemble the data into a usable structure.
-func (c *Destination) fetchHosts() error {
+func (c *Collection) fetchHosts() error {
 
 	// setup a http client
 	httpTransport := &http.Transport{}
@@ -65,24 +66,24 @@ func (c *Destination) fetchHosts() error {
 	return nil
 }
 
-// NewCollection will initialize a Destination data structure
-func newCollection() (*Destination, error) {
-	var destination Destination
+// newCollection will initialize a Collection data structure
+func newCollection() (*Collection, error) {
+	var Collection Collection
 
-	destination.start()
+	Collection.start()
 
-	return &destination, nil
+	return &Collection, nil
 }
 
-// Initialize the tool for gathering telemetry
-func (s *Destination) start() error {
+// start will initialize the tool for gathering telemetry
+func (s *Collection) start() error {
 	s.initTelemetry()
 
 	return nil
 }
 
 // finish will cleanup and close anything remaining open
-func (c *Destination) finish() error {
+func (c *Collection) finish() error {
 
 	return nil
 
@@ -90,7 +91,7 @@ func (c *Destination) finish() error {
 
 // fetchServices will scrape the AWS documentation page and pass the response to parseServices to
 // parse and assemble the data into a usable structure for discovering and cataloging endpoints.
-func (c *Destination) fetchServices() error {
+func (c *Collection) fetchServices() error {
 
 	documentationAddress := "https://docs.aws.amazon.com/general/latest/gr/aws-service-information.partial.html"
 
@@ -118,9 +119,9 @@ func (c *Destination) fetchServices() error {
 	return nil
 }
 
-// Parse the the endpoint and quota documentation page for a service for specific data points and then assemble
-// them into a usable data structure.
-func (c *Destination) parseServices(resp *http.Response) error {
+// parseServices will poarse the the endpoint and quota documentation page for a service for specific
+// data points and then assemble them into a usable data structure.
+func (c *Collection) parseServices(resp *http.Response) error {
 
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
@@ -161,7 +162,7 @@ func (c *Destination) parseServices(resp *http.Response) error {
 	return nil
 }
 
-// Parse the service documentation page for specific data points and then assemble them into a
+// parseHosts will parse the service documentation page for specific data points and then assemble them into a
 // usable data structure.
 func (s *Service) parseHosts(resp *http.Response) error {
 	// Load the HTML document
@@ -180,8 +181,9 @@ func (s *Service) parseHosts(resp *http.Response) error {
 	// and look for specific matches to the pattern we need. The second statement is needed due to some pages
 	// wrapping multiple endpoints in <p> tags. This will pick up on the newline that is used and filter out the
 	// multiple endpoints per <td>.
-	doc.Find("td").Each(func(i int, g *goquery.Selection) {
+	doc.Find("td").Each(func(i int, g *goquery.Selection) { // table cell
 
+		// if the cell contains a url we append it to the host slice
 		if strings.Contains(g.Text(), ".com") && !strings.Contains(g.Text(), "\n") {
 
 			h = appendHostIfMissing(h, strings.TrimSpace(g.Text()))
@@ -191,25 +193,25 @@ func (s *Service) parseHosts(resp *http.Response) error {
 
 		// This pull out some of the ports that are scattered in the docs. The code is incomplete at this
 		// time due to the inconsistent nature of the documentation. Manual review is needed for the port.
-		//re := regexp.MustCompile(`port\s[0-9]{2,5}`)
-		//port := re.FindString(g.Text())
-		//if port != "" {
-		//	portNumber := strings.Split(port, " ")
-		//}
+		re := regexp.MustCompile(`port\s[0-9]{2,5}`)
+		port := re.FindString(g.Text())
+		if port != "" {
+			portNumber := strings.Split(port, " ")
+			fmt.Println(portNumber)
+
+		}
 
 		// Find the <p> items. The data points we need are stored in a table. We pull each column in the table row
 		// and look for specific matches to the pattern we need. This is here to pick up on the cases where there
 		// are multiple endpoints for a given region. In this case Amazon will wrap each endpoint in a <p> statement.
 		g.Find("p").Each(func(i int, f *goquery.Selection) {
 
-			if strings.Contains(f.Text(), ".com") {
+			if strings.Contains(f.Text(), ".com") && !strings.Contains(g.Text(), "\t") {
 
 				h = appendHostIfMissing(h, strings.TrimSpace(f.Text()))
 				hCount++
 			}
 		})
-
-
 	})
 	s.Endpoint.HostCount = hCount
 	s.Endpoint.Host = h
@@ -219,7 +221,7 @@ func (s *Service) parseHosts(resp *http.Response) error {
 	// BUG manual checking. This could only be done on the first pass but that would require loading an existing
 	// BUG endpoint yaml file and then diffing and combining it with what we have which is beyond the scope
 	// BUG of the pilot.
-	s.Endpoint.Port = ""
+	//s.Endpoint.Port = "443"
 
 	return nil
 }

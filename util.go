@@ -27,14 +27,6 @@ import (
 	"os"
 )
 
-// checkError is a generic error checking function
-func checkError(e error) {
-	if e != nil {
-		fmt.Println(e)
-		os.Exit(1)
-	}
-}
-
 // appendServiceIfMissing will check the service slice before appending it
 func appendServiceIfMissing(slice []*Service, s *Service) []*Service {
 	for _, ele := range slice {
@@ -55,17 +47,17 @@ func appendHostIfMissing(slice []string, s string) []string {
 	return append(slice, s)
 }
 
-// outputDestination will output the data structures in the chosen format.
-func (c *Destination) outputDestination() error {
+// outputCollection will output the data structures in the chosen format.
+func (c *Collection) outputCollection() error {
 
 	// create a yaml file and write it out
-	_, yaml := Find(c.Config.OutputType, "yaml")
+	_, yaml := find(c.Config.OutputType, "yaml")
 	if yaml {
 		c.createYaml()
 	}
 
 	// output the data in a simple text format to stdout
-	_, stdout := Find(c.Config.OutputType, "stdout")
+	_, stdout := find(c.Config.OutputType, "stdout")
 	if stdout {
 		c.writeStdout()
 	}
@@ -73,9 +65,9 @@ func (c *Destination) outputDestination() error {
 	return nil
 }
 
-// Find takes a slice and looks for an element in it. If found it will
+// find takes a slice and looks for an element in it. If found it will
 // return it's key, otherwise it will return -1 and a bool of false.
-func Find(slice []string, val string) (int, bool) {
+func find(slice []string, val string) (int, bool) {
 	for i, item := range slice {
 		if item == val {
 			return i, true
@@ -85,7 +77,7 @@ func Find(slice []string, val string) (int, bool) {
 }
 
 // writeStdout will write the services to stdout for further user interactions
-func (c *Destination) writeStdout() {
+func (c *Collection) writeStdout() {
 	for _, s := range c.Services {
 		fmt.Println(s.Name)
 		for _, h := range s.Endpoint.Host {
@@ -96,7 +88,7 @@ func (c *Destination) writeStdout() {
 }
 
 // writeFile will write out a string to a given file
-func (c *Destination) writeFile(out string) {
+func (c *Collection) writeFile(out string) {
 	f, _ := os.Create(c.Config.OutputFile)
 
 	w := bufio.NewWriter(f)

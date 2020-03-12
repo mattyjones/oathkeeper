@@ -1,6 +1,6 @@
 ---
 name: "AWS Endpoint Whitelist"
-team: "Public Proxy"
+team: ""
 acl:
     -   name: whitelist
         destination:

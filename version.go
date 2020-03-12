@@ -35,7 +35,7 @@ const AppVersionMinor = "0"
 const AppVersionPatch = "1"
 
 // AppVersionPre ...
-const AppVersionPre = "3"
+const AppVersionPre = ""
 
 // AppVersionBuild should be empty string when releasing
 const AppVersionBuild = ""

@@ -26,7 +26,7 @@ import (
 )
 
 // wtiteYaml will write out the data in a yaml format specified in the requirements sheet
-func (c *Destination) createYaml() {
+func (c *Collection) createYaml() {
 
 	yamlData, _ := yaml.Marshal(&c)
 

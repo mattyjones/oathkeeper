@@ -28,7 +28,6 @@ import (
 // The names of the struct's below are used to build the yaml output of a specific format.
 // Changing the names without ensuring that the tags are correct will break the desired format
 
-// TODO this should be a pointer
 // Endpoints contains the required host data for services
 type Endpoints struct {
 	Host      []string `yaml:"host"`
@@ -45,8 +44,8 @@ type Service struct {
 }
 
 // Destination is a collection of services and will hold all known services and their associated endpoints.
-type Destination struct {
-	Services     []*Service `yaml:"destination"`
+type Collection struct {
+	Services     []*Service `yaml:"Destination"`
 	ServiceCount int        `yaml:"-"`
 	Telemetry    *Telemetry `yaml:"-"`
 	Config       Config     `yaml:"-"`
@@ -59,7 +58,6 @@ type Telemetry struct {
 	HostTotal    int       `yaml:"-"`
 }
 
-// TODO this should be a pointer
 // Config stores various configuration details
 type Config struct {
 	OutputType []string `yaml:"-"`

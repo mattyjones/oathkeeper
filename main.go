@@ -39,7 +39,7 @@ func main() {
 	collection.fetchHosts()
 
 	// output the data
-	collection.outputDestination()
+	collection.outputCollection()
 
 	// finish and do any cleanup needed
 	collection.finish()
